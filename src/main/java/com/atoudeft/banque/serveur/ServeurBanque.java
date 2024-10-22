@@ -88,7 +88,7 @@ public class ServeurBanque extends Serveur {
             if(cnx instanceof ConnexionBanque && ((ConnexionBanque) cnx).estInactifDepuis(DELAI_INACTIVITE))
             {
                 cnx.envoyer("END");
-                //Fermer la connexion
+                //Fermer la connexion avec cnx
                 //Enlever la connexion de la liste des connectés
             }
         }
