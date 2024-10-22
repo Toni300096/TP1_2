@@ -3,3 +3,4 @@ Fichiers BankServer
 Membres:
 Antoine Larocque
 Tristan
+Nicolas Motta
