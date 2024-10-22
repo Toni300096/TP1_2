@@ -59,7 +59,7 @@ public class GestionnaireEvenementServeur implements GestionnaireEvenement {
                 /******************* COMMANDES DE GESTION DE COMPTES *******************/
                 case "NOUVEAU": //Crée un nouveau compte-client :
                     if (cnx.getNumeroCompteClient()!=null) {
-                        cnx.envoyer("NOUVEAU NO deja connecte");
+                        cnx.envoyer("NOUVEAU NO deja connecté");
                         break;
                     }
                     argument = evenement.getArgument();
