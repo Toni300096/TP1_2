@@ -84,7 +84,7 @@ public class GestionnaireEvenementServeur implements GestionnaireEvenement {
                     break;
                 case "CONNECT": //Se connecte à un compte préexistant et libre.
                     if (cnx.getNumeroCompteClient()!=null) {
-                        cnx.envoyer("CONNECT NO deja connecté");
+                        cnx.envoyer("CONNECT NO deja connecte");
                         break;
                     }
                     argument = evenement.getArgument();
@@ -94,7 +94,7 @@ public class GestionnaireEvenementServeur implements GestionnaireEvenement {
                     nip = t[1];
                     for(Connexion cny: serveur.connectes){
                         if(cny instanceof ConnexionBanque && ((ConnexionBanque) cny).getNumeroCompteClient().equals(t[0])){
-                            cnx.envoyer("CONNECT NO "+numCompteClient+" deja utilisé");
+                            cnx.envoyer("CONNECT NO "+numCompteClient+" deja utilise");
                             break;
                         }
                     }
@@ -107,12 +107,12 @@ public class GestionnaireEvenementServeur implements GestionnaireEvenement {
                         cnx.envoyer("CONNECT NO mauvaises informations");
                         break;
                     }
-
                     //Vous inscrivez le numéro du compte-client et le numéro de son compte
                     //chèque dans l’objet ConnexionBanque du client. Le serveur envoie la réponse
                     //CONNECT OK.
-
-
+                    cnx.setNumeroCompteClient(numCompteClient);
+                    cnx.setNumeroCompteActuel(banque.getNumeroCompteParDefaut(numCompteClient));
+                    cnx.envoyer("CONNECT OK compte "+t[0]+" maintenant connecté");
                     break;
                 /******************* TRAITEMENT PAR DÉFAUT *******************/
                 default: //Renvoyer le texte recu convertit en majuscules :

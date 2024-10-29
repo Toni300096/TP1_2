@@ -30,7 +30,7 @@ public class ConnexionBanque extends Connexion {
      * (Tristan)
      */
     public boolean estInactifDepuis(long delai) {
-        return System.currentTimeMillis()> tempsDerniereOperation+delai;
+        return System.currentTimeMillis()>= tempsDerniereOperation+delai;
     }
 
     /**
