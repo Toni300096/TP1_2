@@ -1,18 +1,21 @@
 package com.atoudeft.banque;
 
-public class CompteCheque extends CompteBancaire {
+public class CompteEpargne extends CompteBancaire {
     private double balance = 0;
+    private double limite = 1000;
+    private double frais = 2;
+    private double tauxInterets;
 
     /**
-     * Crée un compte chèque.
+     * Crée un compte épargne.
      *
      * @param numero numéro du compte
      * @param type   type du compte
      */
-    public CompteCheque(String numero, TypeCompte type) {
+    public CompteEpargne(String numero, TypeCompte type, double tauxInterets) {
         super(numero, type);
+        this.tauxInterets = tauxInterets;
     }
-
 
     public boolean crediter(double montant) {
         if (montant >= 0) {
@@ -27,6 +30,9 @@ public class CompteCheque extends CompteBancaire {
     public boolean debiter(double montant) {
         if (montant >= 0) {
             if (balance >= montant) {
+                if (balance < limite) { // frais de 2$
+                    balance = balance - frais;
+                }
                 balance = balance - montant;
                 return true;
             } else {
@@ -45,4 +51,10 @@ public class CompteCheque extends CompteBancaire {
     public boolean transferer(double dou, String str) {
         return false;
     }
+
+    public void ajouterInterets() {
+        balance = balance + balance*tauxInterets;
+    }
+
+
 }
