@@ -107,7 +107,48 @@ public class Banque implements Serializable {
                 . Créer un compte-chèque avec ce numéro et l'ajouter au compte-client;
                 . Ajouter le compte-client à la liste des comptes et retourner true.
          */
-        return this.comptes.add(new CompteClient(numCompteClient,nip)); //À modifier
+        // vérification du numéro de compte client
+        boolean retour = true;
+        char[] listeCharacteres = numCompteClient.toCharArray();
+        if (listeCharacteres.length >= 6 && listeCharacteres.length<=8) {
+
+            for (int i=0; i<listeCharacteres.length; i++) {
+                if (Character.isLetter(listeCharacteres[i])) { // si c'est une lettre,
+                    if (!Character.isUpperCase(listeCharacteres[i])) { // vérifier qu'elle est majuscule
+                        retour=false;
+                    }
+                } else if (!Character.isDigit(listeCharacteres[i])) { // si c'est pas un chiffre
+                    retour = false;
+                }
+            }
+        }
+
+        // vérification du nip
+        char[] listeCharacteres2 = nip.toCharArray();
+        if (nip.length() == 4 || nip.length() == 5) {
+            for (int i=0; i<listeCharacteres2.length; i++) {
+                if (!Character.isDigit(listeCharacteres2[i])) {
+                    retour = false;
+                }
+            }
+        } else {
+            retour = false;
+        }
+
+        // vérifier si un compte a déja ce numéro
+        for (int i=0; i<comptes.size(); i++) {
+            if (numCompteClient.equals(comptes.get(i).getNumero())) {
+                retour=false;
+            }
+        }
+
+        if (retour) {
+            CompteClient cClient = new CompteClient(numCompteClient,nip);
+            comptes.add(cClient);
+            cClient.ajouter(new CompteCheque(CompteBancaire.genereNouveauNumero(), TypeCompte.CHEQUE));
+        }
+
+        return retour;
     }
 
     /**
@@ -118,6 +159,12 @@ public class Banque implements Serializable {
      */
     public String getNumeroCompteParDefaut(String numCompteClient) {
         //À compléter : retourner le numéro du compte-chèque du compte-client.
-        return null; //À modifier
+        String retour = null;
+        for (int i=0; i<comptes.size(); i++) {
+            if (comptes.get(i).getNumero().equals(numCompteClient)) {
+                retour = comptes.get(i).getComptesBancaires().getFirst().getNumero();
+            }
+        }
+        return retour;
     }
 }
