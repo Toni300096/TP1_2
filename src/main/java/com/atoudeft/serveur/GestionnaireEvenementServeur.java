@@ -1,6 +1,7 @@
 package com.atoudeft.serveur;
 
 import com.atoudeft.banque.Banque;
+import com.atoudeft.banque.CompteClient;
 import com.atoudeft.banque.serveur.ConnexionBanque;
 import com.atoudeft.banque.serveur.ServeurBanque;
 import com.atoudeft.commun.evenement.Evenement;
@@ -47,6 +48,7 @@ public class GestionnaireEvenementServeur implements GestionnaireEvenement {
             typeEvenement = evenement.getType();
             cnx.setTempsDerniereOperation(System.currentTimeMillis());
             switch (typeEvenement) {
+
                 /******************* COMMANDES GÉNÉRALES *******************/
                 case "EXIT": //Ferme la connexion avec le client qui a envoyé "EXIT":
                     cnx.envoyer("END");
@@ -79,6 +81,38 @@ public class GestionnaireEvenementServeur implements GestionnaireEvenement {
                         else
                             cnx.envoyer("NOUVEAU NO "+t[0]+" existe");
                     }
+                    break;
+                case "CONNECT": //Se connecte à un compte préexistant et libre.
+                    if (cnx.getNumeroCompteClient()!=null) {
+                        cnx.envoyer("CONNECT NO deja connecté");
+                        break;
+                    }
+                    argument = evenement.getArgument();
+                    t = argument.split(":");
+                    //Vérifie qu'aucune des ConnexionBanque déjà connectés utilise le même numéro de compte.
+                    numCompteClient = t[0];
+                    nip = t[1];
+                    for(Connexion cny: serveur.connectes){
+                        if(cny instanceof ConnexionBanque && ((ConnexionBanque) cny).getNumeroCompteClient().equals(t[0])){
+                            cnx.envoyer("CONNECT NO "+numCompteClient+" deja utilisé");
+                            break;
+                        }
+                    }
+                    banque = serveurBanque.getBanque();
+                    //Récupérez de la banque le compte-client et vérifiez que le nip est correct. Si
+                    //le compte n’existe pas ou le nip est incorrect, le serveur refuse la demande et
+                    //envoie la réponse CONNECT NO au client;
+                    CompteClient compteTest = banque.getCompteClient(numCompteClient);
+                    if(compteTest==null || compteTest.verifierNip(nip)){
+                        cnx.envoyer("CONNECT NO mauvaises informations");
+                        break;
+                    }
+
+                    //Vous inscrivez le numéro du compte-client et le numéro de son compte
+                    //chèque dans l’objet ConnexionBanque du client. Le serveur envoie la réponse
+                    //CONNECT OK.
+
+
                     break;
                 /******************* TRAITEMENT PAR DÉFAUT *******************/
                 default: //Renvoyer le texte recu convertit en majuscules :
