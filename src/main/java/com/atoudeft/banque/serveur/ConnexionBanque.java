@@ -27,6 +27,7 @@ public class ConnexionBanque extends Connexion {
      *
      * @param delai le délai en millisecondes
      * @return true la durée d'inactivité est supérieure à delai
+     * (Tristan)
      */
     public boolean estInactifDepuis(long delai) {
         return System.currentTimeMillis()> tempsDerniereOperation+delai;

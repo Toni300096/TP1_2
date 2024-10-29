@@ -82,14 +82,19 @@ public class ServeurBanque extends Serveur {
     /**
      * Supprime toutes les connexions inactives (celles dont le délai d'inactivité dépasse DELAI_INACTIVITE - voir énoncé
      * du TP).
+     * (Tristan)
      */
     public void supprimeInactifs() {
-        for(Connexion cnx:connectes) {
-            if(cnx instanceof ConnexionBanque && ((ConnexionBanque) cnx).estInactifDepuis(DELAI_INACTIVITE))
+        for(int i=connectes.size()-1; i>=0; i--) //Cette boucle for ce doit d'être à l'envers, car on compte y suprimer des Connexions.
+         {
+             //Vérifie que chacun des membres de connectes sont des Connexion Banque &
+             //Vérifie si elles sont inactives
+            if(connectes.get(i) instanceof ConnexionBanque && ((ConnexionBanque) connectes.get(i)).estInactifDepuis(DELAI_INACTIVITE))
             {
-                cnx.envoyer("END");
-                //Fermer la connexion avec cnx
-                //Enlever la connexion de la liste des connectés
+                //Quand une ConnexionBanque est trouvé,
+                connectes.get(i).envoyer("END"); //Envoie End au client
+                connectes.get(i).close(); //Ferme la connexion
+                connectes.remove(i); //et enleve la connexion de la liste Connectes
             }
         }
 
