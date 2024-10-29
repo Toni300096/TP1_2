@@ -1,12 +1,13 @@
 package com.atoudeft.serveur;
 
-import com.atoudeft.banque.Banque;
-import com.atoudeft.banque.CompteClient;
+import com.atoudeft.banque.*;
 import com.atoudeft.banque.serveur.ConnexionBanque;
 import com.atoudeft.banque.serveur.ServeurBanque;
 import com.atoudeft.commun.evenement.Evenement;
 import com.atoudeft.commun.evenement.GestionnaireEvenement;
 import com.atoudeft.commun.net.Connexion;
+
+import java.util.List;
 
 /**
  * Cette classe représente un gestionnaire d'événement d'un serveur. Lorsqu'un serveur reçoit un texte d'un client,
@@ -112,6 +113,41 @@ public class GestionnaireEvenementServeur implements GestionnaireEvenement {
                     //chèque dans l’objet ConnexionBanque du client. Le serveur envoie la réponse
                     //CONNECT OK.
 
+
+                    break;
+
+                case "EPARGNE": // créer un compte épargne pour le client
+                    CompteClient compteClient = serveurBanque.getBanque().getCompteClient(cnx.getNumeroCompteClient());
+                    boolean echoue = false;
+                    if (cnx.getNumeroCompteClient()==null) {
+                        echoue = true;
+                    } else {
+                        List<CompteBancaire> comptes = compteClient.getComptesBancaires();
+                        for (int i=0; i<comptes.size(); i++) {
+                            if (comptes.get(i).getType().equals(TypeCompte.EPARGNE)) {
+                                echoue = true;
+                            }
+                        }
+                    }
+
+                    if (echoue) {
+                        cnx.envoyer("EPARGNE NO");
+                    } else { // si les exceptions ont été passées, créer un compte épargne avec un numéro unique.
+                        String num=null;
+                        boolean recherche = true;
+                        while (recherche) {
+                            recherche = false;
+                            num = CompteBancaire.genereNouveauNumero();
+                            for (int i=0; i<serveurBanque.getBanque().getComptesClient().size(); i++) {
+                                if (serveurBanque.getBanque().getComptesClient().get(i).getNumero().equals(num)) {
+                                    recherche = true;
+                                }
+                            }
+                        }
+
+                        CompteEpargne c = new CompteEpargne(num, TypeCompte.EPARGNE, 0.05);
+                        compteClient.ajouter(c);
+                    }
 
                     break;
                 /******************* TRAITEMENT PAR DÉFAUT *******************/

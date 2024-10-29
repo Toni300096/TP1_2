@@ -167,4 +167,8 @@ public class Banque implements Serializable {
         }
         return retour;
     }
+
+    public List<CompteClient> getComptesClient() {
+        return comptes;
+    }
 }
