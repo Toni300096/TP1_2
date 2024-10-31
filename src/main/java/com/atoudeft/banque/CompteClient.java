@@ -51,4 +51,12 @@ public class CompteClient implements Serializable {
             throw new IllegalArgumentException("le montant doit etre positif");
         }
     }
+    public void retirer(double montantRetrait){
+        if (montantRetrait > 0 && solde > 0){
+            solde -= montantRetrait;
+        }
+        else {
+            throw new IllegalArgumentException("le montant doit etre positif et le solde doit etre plus que 0");
+        }
+    }
 }
