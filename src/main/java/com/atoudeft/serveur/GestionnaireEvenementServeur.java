@@ -37,7 +37,7 @@ public class GestionnaireEvenementServeur implements GestionnaireEvenement {
     @Override
     public void traiter(Evenement evenement) {
         Object source = evenement.getSource();
-        ServeurBanque serveurBanque = (ServeurBanque)serveur;
+        ServeurBanque serveurBanque = (ServeurBanque) serveur;
         Banque banque;
         ConnexionBanque cnx;
         String msg, typeEvenement, argument, numCompteClient, nip;
@@ -61,30 +61,28 @@ public class GestionnaireEvenementServeur implements GestionnaireEvenement {
                     break;
                 /******************* COMMANDES DE GESTION DE COMPTES *******************/
                 case "NOUVEAU": //Crée un nouveau compte-client :
-                    if (cnx.getNumeroCompteClient()!=null) {
+                    if (cnx.getNumeroCompteClient() != null) {
                         cnx.envoyer("NOUVEAU NO deja connecté");
                         break;
                     }
                     argument = evenement.getArgument();
                     t = argument.split(":");
-                    if (t.length<2) {
+                    if (t.length < 2) {
                         cnx.envoyer("NOUVEAU NO");
-                    }
-                    else {
+                    } else {
                         numCompteClient = t[0];
                         nip = t[1];
                         banque = serveurBanque.getBanque();
-                        if (banque.ajouter(numCompteClient,nip)) {
+                        if (banque.ajouter(numCompteClient, nip)) {
                             cnx.setNumeroCompteClient(numCompteClient);
                             cnx.setNumeroCompteActuel(banque.getNumeroCompteParDefaut(numCompteClient));
                             cnx.envoyer("NOUVEAU OK " + t[0] + " cree");
-                        }
-                        else
-                            cnx.envoyer("NOUVEAU NO "+t[0]+" existe");
+                        } else
+                            cnx.envoyer("NOUVEAU NO " + t[0] + " existe");
                     }
                     break;
                 case "CONNECT": //Se connecte à un compte préexistant et libre.
-                    if (cnx.getNumeroCompteClient()!=null) {
+                    if (cnx.getNumeroCompteClient() != null) {
                         cnx.envoyer("CONNECT NO deja connecte");
                         break;
                     }
@@ -93,9 +91,9 @@ public class GestionnaireEvenementServeur implements GestionnaireEvenement {
                     //Vérifie qu'aucune des ConnexionBanque déjà connectés utilise le même numéro de compte.
                     numCompteClient = t[0];
                     nip = t[1];
-                    for(Connexion cny: serveur.connectes){
-                        if(cny instanceof ConnexionBanque && ((ConnexionBanque) cny).getNumeroCompteClient().equals(t[0])){
-                            cnx.envoyer("CONNECT NO "+numCompteClient+" deja utilise");
+                    for (Connexion cny : serveur.connectes) {
+                        if (cny instanceof ConnexionBanque && ((ConnexionBanque) cny).getNumeroCompteClient().equals(t[0])) {
+                            cnx.envoyer("CONNECT NO " + numCompteClient + " deja utilise");
                             break;
                         }
                     }
@@ -104,7 +102,7 @@ public class GestionnaireEvenementServeur implements GestionnaireEvenement {
                     //le compte n’existe pas ou le nip est incorrect, le serveur refuse la demande et
                     //envoie la réponse CONNECT NO au client;
                     CompteClient compteTest = banque.getCompteClient(numCompteClient);
-                    if(compteTest==null || compteTest.verifierNip(nip)){
+                    if (compteTest == null || compteTest.verifierNip(nip)) {
                         cnx.envoyer("CONNECT NO mauvaises informations");
                         break;
                     }
@@ -113,17 +111,17 @@ public class GestionnaireEvenementServeur implements GestionnaireEvenement {
                     //CONNECT OK.
                     cnx.setNumeroCompteClient(numCompteClient);
                     cnx.setNumeroCompteActuel(banque.getNumeroCompteParDefaut(numCompteClient));
-                    cnx.envoyer("CONNECT OK compte "+t[0]+" maintenant connecté");
+                    cnx.envoyer("CONNECT OK compte " + t[0] + " maintenant connecté");
                     break;
 
                 case "EPARGNE": // créer un compte épargne pour le client
                     CompteClient compteClient = serveurBanque.getBanque().getCompteClient(cnx.getNumeroCompteClient());
                     boolean echoue = false;
-                    if (cnx.getNumeroCompteClient()==null) {
+                    if (cnx.getNumeroCompteClient() == null) {
                         echoue = true;
                     } else {
                         List<CompteBancaire> comptes = compteClient.getComptesBancaires();
-                        for (int i=0; i<comptes.size(); i++) {
+                        for (int i = 0; i < comptes.size(); i++) {
                             if (comptes.get(i).getType().equals(TypeCompte.EPARGNE)) {
                                 echoue = true;
                             }
@@ -133,12 +131,12 @@ public class GestionnaireEvenementServeur implements GestionnaireEvenement {
                     if (echoue) {
                         cnx.envoyer("EPARGNE NO");
                     } else { // si les exceptions ont été passées, créer un compte épargne avec un numéro unique.
-                        String num=null;
+                        String num = null;
                         boolean recherche = true;
                         while (recherche) {
                             recherche = false;
                             num = CompteBancaire.genereNouveauNumero();
-                            for (int i=0; i<serveurBanque.getBanque().getComptesClient().size(); i++) {
+                            for (int i = 0; i < serveurBanque.getBanque().getComptesClient().size(); i++) {
                                 if (serveurBanque.getBanque().getComptesClient().get(i).getNumero().equals(num)) {
                                     recherche = true;
                                 }
@@ -149,7 +147,30 @@ public class GestionnaireEvenementServeur implements GestionnaireEvenement {
                         compteClient.ajouter(c);
                     }
 
+                case "DEPOT": //depose de l'argent dans le compte client
+                    //verifie si un client est connecte en regardant si il y a un numero de compte client
+                    if (cnx.getNumeroCompteClient() == null) {
+                        cnx.envoyer("DEPOT NO");
+                        break;
+                    }
+                    //recupere les arguments de l'evenement
+                    argument = evenement.getArgument();
+                    t = argument.split(":");
+                    //verifie si il y a au moins 1 argument etant le montant
+                    if (t.length < 1) {
+                        cnx.envoyer("DEPOT NO");
+                        break;
+                    }
+                    //convertit le premier input en le montant a deposer
+                    double montantDepot = Double.parseDouble(t[0]);
+                    numCompteClient = cnx.getNumeroCompteClient();
+                    banque = serveurBanque.getBanque();
+                    CompteClient compteDepot = banque.getCompteClient(numCompteClient);
+                    compteDepot.deposer(montantDepot);
+
+                    cnx.envoyer("DEPOT OK: " + montantDepot + "DEPOSE");
                     break;
+
                 /******************* TRAITEMENT PAR DÉFAUT *******************/
                 default: //Renvoyer le texte recu convertit en majuscules :
                     msg = (evenement.getType() + " " + evenement.getArgument()).toUpperCase();
