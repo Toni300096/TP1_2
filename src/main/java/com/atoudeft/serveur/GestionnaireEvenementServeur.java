@@ -7,6 +7,7 @@ import com.atoudeft.commun.evenement.Evenement;
 import com.atoudeft.commun.evenement.GestionnaireEvenement;
 import com.atoudeft.commun.net.Connexion;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -192,8 +193,70 @@ public class GestionnaireEvenementServeur implements GestionnaireEvenement {
                     compteRetrait.retirer(montantRetrait);
                     cnx.envoyer("RETRAIT OK: " + montantRetrait + "RETIRE");
                     break;
+                case "FACTURE": //payer une facture
+                    //verifie la connection du client
+                    if (cnx.getNumeroCompteClient() == null){
+                        cnx.envoyer("FACTURE NO");
+                        break;
+                    }
+
+                    argument = evenement.getArgument();
+                    t = argument.split(":");
+
+                    //verifie qu'il y a 3 arguments (montant, # facture, description)
+                    if(t.length < 3){
+                        cnx.envoyer("FACTURE NO")
+                                break;
+                    }
+
+                    double montantFacture = Double.parseDouble(t[0]);
+                    String numeroFacture = t[1];
+                    String description = String.join(" ", Arrays.copyOfRange(t,2,t.length));
+
+                    numCompteClient = cnx.getNumeroCompteClient();
+                    banque = serveurBanque.getBanque();
+                    CompteClient compteFacture = banque.getCompteClient(numCompteClient);
 
 
+                    //essayer de payer la facture
+                    if (compteFacture.payerFacture(montantFacture, numeroFacture)) {
+                        cnx.envoyer("FACTURE OK " + montantFacture + " payer pour la facture " + numeroFacture);
+                    }
+                    else{
+                        cnx.envoyer("FACTURE NO");
+                    }
+                    break;
+
+                case "TRANSFER": //transferer des fonds vers un autre compte
+                    //verifie connection client
+                    if(cnx.getNumeroCompteClient() == null){
+                        cnx.envoyer("FACTURE NO");
+                        break;
+                    }
+
+                    argument = evenement.getArgument();
+                    t = argument.split(":");
+
+                    if (t.length < 2){
+                        cnx.envoyer("TRANSFER NO");
+                        break;
+                    }
+
+                    double montantTransfer = Double.parseDouble(t[0]);
+                    String numeroCompteDestinataire = t[1];
+
+                    numCompteClient = cnx.getNumeroCompteClient();
+                    banque = serveurBanque.getBanque();
+                    CompteClient compteTransfert = banque.getCompteClient(numCompteClient);
+                    CompteClient compteDestinataire = banque.getCompteClient(numeroCompteDestinataire);
+
+                    if (compteTransfert.transferer(montantTransfer, compteDestinataire)){
+                        cnx.envoyer("TRANFERT OK: " + montantTransfer + "transfere au compte " + numeroCompteDestinataire);
+                    }
+                    else{
+                        cnx.envoyer("TRANFERT NO");
+                    }
+                    break;
 
 
                 /******************* TRAITEMENT PAR DÉFAUT *******************/

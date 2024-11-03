@@ -9,6 +9,9 @@ public class CompteClient implements Serializable {
     private String nip;
     private List<CompteBancaire> comptes;
     private double solde;
+    private double montantFacture;
+    private String numeroFacture;
+
 
     /**
      * Crée un compte-client avec un numéro et un nip.
@@ -58,5 +61,33 @@ public class CompteClient implements Serializable {
         else {
             throw new IllegalArgumentException("le montant doit etre positif et le solde doit etre plus que 0");
         }
+    }
+
+    public boolean payerFacture(double montantFacture, String numeroFacture) {
+        if (solde >= montantFacture) {
+            solde -= montantFacture;
+
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public boolean transferer(double montantTransfer, CompteClient compteDestinataire) {
+        if (montantTransfer <= 0) {
+            throw new IllegalArgumentException("Le montant du transfert doit être supérieur à zéro.");
+        }
+
+        if (solde >= montantTransfer) {
+            solde -= montantTransfer;
+            compteDestinataire.ajouterFonds(montantTransfer);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public void ajouterFonds(double montant) {
+        solde += montant;
     }
 }
