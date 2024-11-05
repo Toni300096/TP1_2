@@ -228,7 +228,27 @@ public class GestionnaireEvenementServeur implements GestionnaireEvenement {
                         cnx.envoyer("FACTURE NO");
                     }
                     break;
+                case "HIST": //7.7 (TRISTAN)
+                    //Obtenir le compte client + Verifier qu'il est belle et bien connecté
+                    banque = serveurBanque.getBanque(); //Verification d'existence n'est pas encore implemente
+                    if(banque==null) {
+                        cnx.envoyer("HIST NO vous n'êtes pas connecté");
+                        break;
+                    }
+                    //J'ai besoin de vérifier qu'un comptebanquaire seras trouvé avant de le mettre dans historique
+                    List<CompteBancaire> compteBancaires= banque.getCompteClient(cnx.getNumeroCompteClient()).getComptesBancaires();
+                    PileChainee historique = new PileChainee();
+                    //Chercher le compte(setNumeroCompteActuel) dans comptes
+                    for(CompteBancaire compteBancaire:compteBancaires){
+                        if (compteBancaire.getNumero().equals(cnx.getNumeroCompteActuel())){
+                            //Chercher l'attribut historique (une pile chaine)
+                            historique = compteBancaire.getHistorique();
+                        }
+                    }
+                    //Écrire à l'utilisateur la liste de ses opérations passé.
+                    historique.toString(); //Semble déjà implémenté et ne devrais pas poser problème.
 
+                    break;
                 case "TRANSFER": //transferer des fonds vers un autre compte
                     //verifie connection client
                     if(cnx.getNumeroCompteClient() == null){
@@ -259,6 +279,7 @@ public class GestionnaireEvenementServeur implements GestionnaireEvenement {
                         cnx.envoyer("TRANFERT NO");
                     }
                     break;
+
 
 
                 /******************* TRAITEMENT PAR DÉFAUT *******************/
