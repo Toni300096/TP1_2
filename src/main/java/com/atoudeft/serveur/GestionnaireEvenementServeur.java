@@ -118,7 +118,7 @@ public class GestionnaireEvenementServeur implements GestionnaireEvenement {
                 case "EPARGNE": // créer un compte épargne pour le client
                     CompteClient compteClient = serveurBanque.getBanque().getCompteClient(cnx.getNumeroCompteClient());
                     boolean echoue = false;
-                    if (cnx.getNumeroCompteClient() == null) {
+                    if (cnx.getNumeroCompteClient() == null) { // vérifier que le client est connecté
                         echoue = true;
                     } else {
                         List<CompteBancaire> comptes = compteClient.getComptesBancaires();
@@ -146,6 +146,35 @@ public class GestionnaireEvenementServeur implements GestionnaireEvenement {
 
                         CompteEpargne c = new CompteEpargne(num, TypeCompte.EPARGNE, 0.05);
                         compteClient.ajouter(c);
+                    }
+
+                case "SELECT": //permettre au client de sélectionner un compte bancaire (QUESTION 5)
+                    boolean reussi = false;
+                    if (cnx.getNumeroCompteClient() != null) {
+                        argument = evenement.getArgument(); // obtenir l'argument de la commande
+                        System.out.println("Argument: "+argument); // DEBUG
+                        CompteClient leCompteClient = serveurBanque.getBanque().getCompteClient(cnx.getNumeroCompteClient()); // obtenir le compte client.
+                        List<CompteBancaire> comptes = leCompteClient.getComptesBancaires(); // obtenir la liste des comptes bancaires à partir du compte client.
+                        if (argument.equals("cheque")) { // cas ou l'on cherche le compte chèque.
+                            for (int i = 0; i < comptes.size(); i++) { // itérer les comptes
+                                if (comptes.get(i).getType().equals(TypeCompte.CHEQUE)) {
+                                    cnx.setNumeroCompteActuel(comptes.get(i).getNumero()); // une fois trouvé le compte chèque, enregistrer son numéro dans l'objet ConnectionBanque
+                                    reussi = true;
+                                }
+                            }
+                        } else if (argument.equals("epargne")) {
+                            for (int i = 0; i < comptes.size(); i++) {
+                                if (comptes.get(i).getType().equals(TypeCompte.EPARGNE)) {
+                                    cnx.setNumeroCompteActuel(comptes.get(i).getNumero()); // une fois trouvé le compte épargne, enregistrer son numéro dans l'objet ConnectionBanque
+                                    reussi = true;
+                                }
+                            }
+                        }
+                    }
+                    if (reussi) {
+                        cnx.envoyer("SELECT OK");
+                    } else {
+                        cnx.envoyer("SELECT NO");
                     }
 
                 case "DEPOT": //depose de l'argent dans le compte client
@@ -205,7 +234,7 @@ public class GestionnaireEvenementServeur implements GestionnaireEvenement {
 
                     //verifie qu'il y a 3 arguments (montant, # facture, description)
                     if(t.length < 3){
-                        cnx.envoyer("FACTURE NO")
+                        cnx.envoyer("FACTURE NO");
                                 break;
                     }
 
