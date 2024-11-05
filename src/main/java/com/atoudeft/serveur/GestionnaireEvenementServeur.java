@@ -119,7 +119,7 @@ public class GestionnaireEvenementServeur implements GestionnaireEvenement {
                 case "EPARGNE": // créer un compte épargne pour le client
                     CompteClient compteClient = serveurBanque.getBanque().getCompteClient(cnx.getNumeroCompteClient());
                     boolean echoue = false;
-                    if (cnx.getNumeroCompteClient() == null) {
+                    if (cnx.getNumeroCompteClient() == null) { // vérifier que le client est connecté
                         echoue = true;
                     } else {
                         List<CompteBancaire> comptes = compteClient.getComptesBancaires();
