@@ -111,7 +111,6 @@ public class Banque implements Serializable {
         boolean retour = true;
         char[] listeCharacteres = numCompteClient.toCharArray();
         if (listeCharacteres.length >= 6 && listeCharacteres.length<=8) {
-
             for (int i=0; i<listeCharacteres.length; i++) {
                 if (Character.isLetter(listeCharacteres[i])) { // si c'est une lettre,
                     if (!Character.isUpperCase(listeCharacteres[i])) { // vérifier qu'elle est majuscule
@@ -147,7 +146,6 @@ public class Banque implements Serializable {
             comptes.add(cClient);
             cClient.ajouter(new CompteCheque(CompteBancaire.genereNouveauNumero(), TypeCompte.CHEQUE));
         }
-
         return retour;
     }
 

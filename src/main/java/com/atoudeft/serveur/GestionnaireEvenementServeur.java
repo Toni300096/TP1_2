@@ -82,7 +82,7 @@ public class GestionnaireEvenementServeur implements GestionnaireEvenement {
                             cnx.envoyer("NOUVEAU NO " + t[0] + " existe");
                     }
                     break;
-                case "CONNECT": //Se connecte à un compte préexistant et libre.
+                case "CONNECT": //Se connecte à un compte préexistant et libre. (Tristan)
                     if (cnx.getNumeroCompteClient() != null) {
                         cnx.envoyer("CONNECT NO deja connecte");
                         break;
@@ -93,7 +93,7 @@ public class GestionnaireEvenementServeur implements GestionnaireEvenement {
                     numCompteClient = t[0];
                     nip = t[1];
                     for (Connexion cny : serveur.connectes) {
-                        if (cny instanceof ConnexionBanque && ((ConnexionBanque) cny).getNumeroCompteClient().equals(t[0])) {
+                        if (cny instanceof ConnexionBanque && t[0].equals(((ConnexionBanque) cny).getNumeroCompteClient())) {
                             cnx.envoyer("CONNECT NO " + numCompteClient + " deja utilise");
                             break;
                         }
@@ -103,7 +103,8 @@ public class GestionnaireEvenementServeur implements GestionnaireEvenement {
                     //le compte n’existe pas ou le nip est incorrect, le serveur refuse la demande et
                     //envoie la réponse CONNECT NO au client;
                     CompteClient compteTest = banque.getCompteClient(numCompteClient);
-                    if (compteTest == null || compteTest.verifierNip(nip)) {
+
+                    if (compteTest == null || !compteTest.verifierNip(nip)) {
                         cnx.envoyer("CONNECT NO mauvaises informations");
                         break;
                     }
@@ -205,8 +206,8 @@ public class GestionnaireEvenementServeur implements GestionnaireEvenement {
 
                     //verifie qu'il y a 3 arguments (montant, # facture, description)
                     if(t.length < 3){
-                        cnx.envoyer("FACTURE NO")
-                                break;
+                        cnx.envoyer("FACTURE NO");
+                        break;
                     }
 
                     double montantFacture = Double.parseDouble(t[0]);

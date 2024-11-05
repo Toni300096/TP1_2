@@ -7,16 +7,16 @@ import com.atoudeft.banque.serveur.ServeurBanque;
 import java.util.Scanner;
 
 /**
- * Programme simple de démonstration d'un serveur. Le programme démarre un serveur qui se met à écouter
- * l'arrivée de connexions.
+ * Programme simple de dï¿½monstration d'un serveur. Le programme dï¿½marre un serveur qui se met ï¿½ ï¿½couter
+ * l'arrivï¿½e de connexions.
  *
- * @author Abdelmoumène Toudeft (Abdelmoumene.Toudeft@etsmtl.ca)
+ * @author Abdelmoumï¿½ne Toudeft (Abdelmoumene.Toudeft@etsmtl.ca)
  * @version 1.0
  * @since 2023-09-01
  */
 public class ProgrammeServeurTP1 {
 	/**
-	 * Méthode principale du programme.
+	 * Mï¿½thode principale du programme.
 	 *
 	 * @param args Arguments du programme
 	 */
@@ -30,8 +30,7 @@ public class ProgrammeServeurTP1 {
             System.out.println("Serveur a l'ecoute sur le port " + serveur.getPort());
         }
 
-        System.out.println("Saisissez EXIT pour arreter le serveur.");
-        saisie = clavier.nextLine();
+        System.out.println("Saisissez EXIT pour arreter le serveur.");        saisie = clavier.nextLine();
         while (!"EXIT".equals(saisie)) {
             System.out.println("??? Saisissez EXIT pour arreter le serveur.");
             saisie = clavier.nextLine();

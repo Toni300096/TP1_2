@@ -90,4 +90,12 @@ public class CompteClient implements Serializable {
     public void ajouterFonds(double montant) {
         solde += montant;
     }
+
+    //(TRISTAN) Override de la fonction equals de Compte pour faire fonctionner l'indexOF de getCompteClient dans banque.
+    public boolean equals(Object object) {
+        if(object instanceof CompteClient){
+            return this.numero.equals(((CompteClient) object).getNumero());
+        }
+        return this.equals(object);
+    }
 }
