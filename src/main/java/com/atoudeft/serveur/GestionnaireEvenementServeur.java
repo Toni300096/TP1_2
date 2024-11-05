@@ -148,6 +148,7 @@ public class GestionnaireEvenementServeur implements GestionnaireEvenement {
                         CompteEpargne c = new CompteEpargne(num, TypeCompte.EPARGNE, 0.05);
                         compteClient.ajouter(c);
                     }
+                    break;
 
                 case "DEPOT": //depose de l'argent dans le compte client
                     //verifie si un client est connecte en regardant si il y a un numero de compte client
