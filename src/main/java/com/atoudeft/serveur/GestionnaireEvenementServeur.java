@@ -133,6 +133,10 @@ public class GestionnaireEvenementServeur implements GestionnaireEvenement {
                 case "SELECT":
                     if (cnx.getNumeroCompteClient() != null) {
                         argument = evenement.getArgument();
+                        if (argument == null) {
+                            cnx.envoyer("SELECT NO argument invalide");
+                            break;
+                        }
                         numCompteClient = cnx.getNumeroCompteClient();
                         banque = serveurBanque.getBanque();
                         List<CompteBancaire> cb = banque.getCompteClient(numCompteClient).getComptesBancaires(); // obtenir le compte client
