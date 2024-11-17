@@ -7,6 +7,7 @@ import com.atoudeft.commun.evenement.Evenement;
 import com.atoudeft.commun.evenement.GestionnaireEvenement;
 import com.atoudeft.commun.net.Connexion;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -116,6 +117,29 @@ public class GestionnaireEvenementServeur implements GestionnaireEvenement {
                     cnx.envoyer("CONNECT OK compte " + t[0] + " maintenant connecté");
                     break;
 
+                case "SELECT":
+                    if (cnx.getNumeroCompteClient() != null) {
+                        argument = evenement.getArgument();
+                        numCompteClient = cnx.getNumeroCompteClient();
+                        banque = serveurBanque.getBanque();
+                        List<CompteBancaire> cb = banque.getCompteClient(numCompteClient).getComptesBancaires(); // obtenir le compte client
+                        for (int i=0; i<cb.size(); i++) { // itérer à travers des comptes bancaires du client pour trouver le compte recherché
+                            if (argument.equals(TypeCompte.EPARGNE.toString())) {
+                                if (cb.get(i).getType().equals(TypeCompte.EPARGNE)) {
+                                    cnx.setNumeroCompteActuel(cb.get(i).getNumero());
+                                }
+                            } else if (argument.equals(TypeCompte.CHEQUE.toString())) {
+                                if (cb.get(i).getType().equals(TypeCompte.CHEQUE)) {
+                                    cnx.setNumeroCompteActuel(cb.get(i).getNumero());
+                                }
+                            }
+                        }
+
+                    }
+
+
+
+                    break;
                 case "EPARGNE": // créer un compte épargne pour le client
                     CompteClient compteClient = serveurBanque.getBanque().getCompteClient(cnx.getNumeroCompteClient());
                     boolean echoue = false;
