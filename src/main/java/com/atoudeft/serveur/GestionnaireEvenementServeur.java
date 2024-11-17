@@ -140,22 +140,28 @@ public class GestionnaireEvenementServeur implements GestionnaireEvenement {
                         numCompteClient = cnx.getNumeroCompteClient();
                         banque = serveurBanque.getBanque();
                         List<CompteBancaire> cb = banque.getCompteClient(numCompteClient).getComptesBancaires(); // obtenir le compte client
+                        boolean trouve = false;
                         for (int i=0; i<cb.size(); i++) { // itérer à travers des comptes bancaires du client pour trouver le compte recherché
                             if (argument.equals(TypeCompte.EPARGNE.toString())) {
                                 if (cb.get(i).getType().equals(TypeCompte.EPARGNE)) {
                                     cnx.setNumeroCompteActuel(cb.get(i).getNumero());
+                                    cnx.envoyer("SELECT OK compte epargne");
+                                    trouve = true;
                                 }
                             } else if (argument.equals(TypeCompte.CHEQUE.toString())) {
                                 if (cb.get(i).getType().equals(TypeCompte.CHEQUE)) {
                                     cnx.setNumeroCompteActuel(cb.get(i).getNumero());
+                                    cnx.envoyer("SELECT OK compte cheque");
+                                    trouve = true;
                                 }
                             }
                         }
-
+                        if (!trouve) { // si le compte n'est pas trouvé
+                            cnx.envoyer("SELECT NO compte non trouvé");
+                        }
+                        break;
                     }
-
-
-
+                    cnx.envoyer("SELECT NO utilisateur non connecté");
                     break;
                 case "EPARGNE": // créer un compte épargne pour le client
                     CompteClient compteClient = serveurBanque.getBanque().getCompteClient(cnx.getNumeroCompteClient());
