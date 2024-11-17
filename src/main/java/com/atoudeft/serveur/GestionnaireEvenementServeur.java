@@ -88,8 +88,21 @@ public class GestionnaireEvenementServeur implements GestionnaireEvenement {
                         cnx.envoyer("CONNECT NO deja connecte");
                         break;
                     }
+                    banque = serveurBanque.getBanque();
+                    //verifie qu'il y a au moins 1 compte cree
+                    if (banque.getComptesClient().isEmpty()){
+                        cnx.envoyer("CONNECT NO aucun compte existant");
+                        break;
+                    }
+
                     argument = evenement.getArgument();
                     t = argument.split(":");
+                    //verifie si les arguments ont les
+                    if(t.length < 2) {
+                        cnx.envoyer("CONNECT NO arguments invalides");
+                        break;
+                    }
+
                     //Vérifie qu'aucune des ConnexionBanque déjà connectés utilise le même numéro de compte.
                     numCompteClient = t[0];
                     nip = t[1];
