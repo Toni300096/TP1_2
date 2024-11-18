@@ -1,5 +1,6 @@
 package com.atoudeft.banque;
 
+import com.atoudeft.banque.serveur.ConnexionBanque;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.Serializable;
@@ -168,5 +169,12 @@ public class Banque implements Serializable {
 
     public List<CompteClient> getComptesClient() {
         return comptes;
+    }
+    //Nous retourne rapidement le compte bancaire actif d'une connexion (Tristan)
+    public CompteBancaire getCompteBancaireActif(ConnexionBanque cnx){
+        return getCompteClient(cnx.getNumeroCompteClient()).getCompteBancaire(cnx.getNumeroCompteActuel());
+    }
+    public CompteBancaire getCompteBancaire(ConnexionBanque cnx, String numeroCompte) {
+        return getCompteClient(cnx.getNumeroCompteClient()).getCompteBancaire(numeroCompte);
     }
 }

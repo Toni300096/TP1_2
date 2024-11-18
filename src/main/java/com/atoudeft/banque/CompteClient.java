@@ -8,7 +8,6 @@ public class CompteClient implements Serializable {
     private String numero;
     private String nip;
     private List<CompteBancaire> comptes;
-    private double solde;
     private double montantFacture;
     private String numeroFacture;
 
@@ -42,54 +41,20 @@ public class CompteClient implements Serializable {
     public List<CompteBancaire> getComptesBancaires() {
         return comptes;
     }
+    //Permet de trouver un compte par son numéro(string) devrait etre favoriser par rapport a getComptesBancaires. (Tristan)
+    public CompteBancaire getCompteBancaire(String numero) {
+        for (CompteBancaire compte : comptes) {
+            if (compte.getNumero().equals(numero)) {
+                return compte;
+            }
+        }
+        return null;
+    }
     public boolean verifierNip(String nip){
         return this.nip.equals(nip);
     }
 
-    public void deposer(double montantDepot){
-        if (montantDepot > 0){
-            solde += montantDepot;
-        }
-        else {
-            throw new IllegalArgumentException("le montant doit etre positif");
-        }
-    }
-    public void retirer(double montantRetrait){
-        if (montantRetrait > 0 && solde > 0){
-            solde -= montantRetrait;
-        }
-        else {
-            throw new IllegalArgumentException("le montant doit etre positif et le solde doit etre plus que 0");
-        }
-    }
 
-    public boolean payerFacture(double montantFacture, String numeroFacture) {
-        if (solde >= montantFacture) {
-            solde -= montantFacture;
-
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    public boolean transferer(double montantTransfer, CompteClient compteDestinataire) {
-        if (montantTransfer <= 0) {
-            throw new IllegalArgumentException("Le montant du transfert doit être supérieur à zéro.");
-        }
-
-        if (solde >= montantTransfer) {
-            solde -= montantTransfer;
-            compteDestinataire.ajouterFonds(montantTransfer);
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    public void ajouterFonds(double montant) {
-        solde += montant;
-    }
 
     //(TRISTAN) Override de la fonction equals de Compte pour faire fonctionner l'indexOF de getCompteClient dans banque.
     public boolean equals(Object object) {

@@ -55,7 +55,7 @@ public class ListeChainee implements Serializable {
          */
 
         // gérer le cas où la liste est vide
-        if (nbElement == 0) {
+        if (estVide()) {
             return null;
         }
 
