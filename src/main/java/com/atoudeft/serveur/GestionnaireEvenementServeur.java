@@ -230,6 +230,7 @@ public class GestionnaireEvenementServeur implements GestionnaireEvenement {
                     break;
                 case "HIST": //7.7 (TRISTAN)
                     //Obtenir le compte client + Verifier qu'il est belle et bien connecté
+                    System.out.println("Demande pour Hist");
                     banque = serveurBanque.getBanque(); //Verification d'existence n'est pas encore implemente
                     if(banque==null) {
                         cnx.envoyer("HIST NO vous n'êtes pas connecté");
@@ -243,10 +244,12 @@ public class GestionnaireEvenementServeur implements GestionnaireEvenement {
                         if (compteBancaire.getNumero().equals(cnx.getNumeroCompteActuel())){
                             //Chercher l'attribut historique (une pile chaine)
                             historique = compteBancaire.getHistorique();
+                            System.out.println("Found a compte");
                         }
                     }
                     //Écrire à l'utilisateur la liste de ses opérations passé.
-                    historique.toString(); //Semble déjà implémenté et ne devrais pas poser problème.
+                    System.out.println("Demande de print");
+                    cnx.envoyer(historique.toString()); //Semble déjà implémenté et ne devrais pas poser problème.
 
                     break;
                 case "TRANSFER": //transferer des fonds vers un autre compte
