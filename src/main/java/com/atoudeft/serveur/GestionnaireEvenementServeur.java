@@ -7,6 +7,7 @@ import com.atoudeft.commun.evenement.Evenement;
 import com.atoudeft.commun.evenement.GestionnaireEvenement;
 import com.atoudeft.commun.net.Connexion;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -87,8 +88,21 @@ public class GestionnaireEvenementServeur implements GestionnaireEvenement {
                         cnx.envoyer("CONNECT NO deja connecte");
                         break;
                     }
+                    banque = serveurBanque.getBanque();
+                    //verifie qu'il y a au moins 1 compte cree
+                    if (banque.getComptesClient().isEmpty()){
+                        cnx.envoyer("CONNECT NO aucun compte existant");
+                        break;
+                    }
+
                     argument = evenement.getArgument();
                     t = argument.split(":");
+                    //verifie si les arguments ont les
+                    if(t.length < 2) {
+                        cnx.envoyer("CONNECT NO arguments invalides");
+                        break;
+                    }
+
                     //Vérifie qu'aucune des ConnexionBanque déjà connectés utilise le même numéro de compte.
                     numCompteClient = t[0];
                     nip = t[1];
@@ -116,6 +130,39 @@ public class GestionnaireEvenementServeur implements GestionnaireEvenement {
                     cnx.envoyer("CONNECT OK compte " + t[0] + " maintenant connecté");
                     break;
 
+                case "SELECT":
+                    if (cnx.getNumeroCompteClient() != null) {
+                        argument = evenement.getArgument();
+                        if (argument == null) {
+                            cnx.envoyer("SELECT NO argument invalide");
+                            break;
+                        }
+                        numCompteClient = cnx.getNumeroCompteClient();
+                        banque = serveurBanque.getBanque();
+                        List<CompteBancaire> cb = banque.getCompteClient(numCompteClient).getComptesBancaires(); // obtenir le compte client
+                        boolean trouve = false;
+                        for (int i=0; i<cb.size(); i++) { // itérer à travers des comptes bancaires du client pour trouver le compte recherché
+                            if (argument.equals(TypeCompte.EPARGNE.toString())) {
+                                if (cb.get(i).getType().equals(TypeCompte.EPARGNE)) {
+                                    cnx.setNumeroCompteActuel(cb.get(i).getNumero());
+                                    cnx.envoyer("SELECT OK compte epargne");
+                                    trouve = true;
+                                }
+                            } else if (argument.equals(TypeCompte.CHEQUE.toString())) {
+                                if (cb.get(i).getType().equals(TypeCompte.CHEQUE)) {
+                                    cnx.setNumeroCompteActuel(cb.get(i).getNumero());
+                                    cnx.envoyer("SELECT OK compte cheque");
+                                    trouve = true;
+                                }
+                            }
+                        }
+                        if (!trouve) { // si le compte n'est pas trouvé
+                            cnx.envoyer("SELECT NO compte non trouvé");
+                        }
+                        break;
+                    }
+                    cnx.envoyer("SELECT NO utilisateur non connecté");
+                    break;
                 case "EPARGNE": // créer un compte épargne pour le client
                     CompteClient compteClient = serveurBanque.getBanque().getCompteClient(cnx.getNumeroCompteClient());
                     boolean echoue = false;
@@ -151,49 +198,79 @@ public class GestionnaireEvenementServeur implements GestionnaireEvenement {
                     break;
 
                 case "DEPOT": //depose de l'argent dans le compte client
-                    //verifie si un client est connecte en regardant si il y a un numero de compte client
-                    if (cnx.getNumeroCompteClient() == null) {
-                        cnx.envoyer("DEPOT NO");
-                        break;
-                    }
-                    //recupere les arguments de l'evenement
-                    argument = evenement.getArgument();
-                    t = argument.split(":");
-                    //verifie si il y a au moins 1 argument etant le montant
-                    if (t.length < 1) {
-                        cnx.envoyer("DEPOT NO");
-                        break;
-                    }
-                    //convertit le premier input en le montant a deposer
-                    double montantDepot = Double.parseDouble(t[0]);
-                    numCompteClient = cnx.getNumeroCompteClient();
-                    banque = serveurBanque.getBanque();
-                    CompteClient compteDepot = banque.getCompteClient(numCompteClient);
-                    compteDepot.deposer(montantDepot);
+                    try {
+                        //verifie si un client est connecte en regardant si il y a un numero de compte client
+                        if (cnx.getNumeroCompteClient() == null) {
+                            cnx.envoyer("DEPOT NO");
+                            break;
+                        }
 
-                    cnx.envoyer("DEPOT OK: " + montantDepot + "DEPOSE");
+                        //recupere les arguments de l'evenement
+                        argument = evenement.getArgument();
+                        t = argument.split(":");
+                        //verifie si il y a au moins 1 argument etant le montant
+                        if (t.length < 1) {
+                            cnx.envoyer("DEPOT NO");
+                            break;
+                        }
+                        //convertit le premier input en le montant a deposer
+                        double montantDepot;
+                        try {
+                            montantDepot = Double.parseDouble(t[0]);
+                        } catch (NumberFormatException e) {
+                            cnx.envoyer("DEPOT NO: montant invalide");
+                            break;
+                        }
+                        numCompteClient = cnx.getNumeroCompteClient();
+                        banque = serveurBanque.getBanque();
+                        CompteClient compteDepot = banque.getCompteClient(numCompteClient);
+                        compteDepot.deposer(montantDepot);
+
+                        cnx.envoyer("DEPOT OK: " + montantDepot + "DEPOSE");
+                    }
+                    catch(IllegalArgumentException e) {
+                        cnx.envoyer("DEPOT NO: " + e.getMessage());
+                    }
+                    catch(Exception e){
+                        cnx.envoyer("DEPOT NO: une erreur est survenue");
+                        e.printStackTrace(); //pour debug les erreurs (a effacer apres)
+                    }
                     break;
 
                 case "RETRAIT"://retirer de l'argent d'un compte
-                    //verifie si un client est connecte en regardant si il y a un numero de compte client
-                    if (cnx.getNumeroCompteClient() == null) {
-                        cnx.envoyer("RETRAIT NO");
-                        break;
+                    try {
+                        //verifie si un client est connecte en regardant si il y a un numero de compte client
+                        if (cnx.getNumeroCompteClient() == null) {
+                            cnx.envoyer("RETRAIT NO");
+                            break;
+                        }
+                        argument = evenement.getArgument();
+                        t = argument.split(":");
+                        //verifie si il y a au moin s 1 argument
+                        if (t.length < 1) {
+                            cnx.envoyer("RETRAIT NO");
+                            break;
+                        }
+                        //convertit le premier input en le montant a retirer
+                        double montantRetrait;
+                        try {
+                            montantRetrait = Double.parseDouble(t[0]);
+                        } catch (NumberFormatException e) {
+                            cnx.envoyer("RETRAIT NO: montant invalide");
+                            break;
+                        }
+                        numCompteClient = cnx.getNumeroCompteClient();
+                        banque = serveurBanque.getBanque();
+                        CompteClient compteRetrait = banque.getCompteClient(numCompteClient);
+                        compteRetrait.retirer(montantRetrait);
+                        cnx.envoyer("RETRAIT OK: " + montantRetrait + "RETIRE");
                     }
-                    argument = evenement.getArgument();
-                    t = argument.split(":");
-                    //verifie si il y a au moin s 1 argument
-                    if (t.length < 1) {
-                        cnx.envoyer("RETRAIT NO");
-                        break;
+                    catch (IllegalArgumentException e) {
+                        cnx.envoyer("RETRAIT NO: " + e.getMessage());
+                    } catch (Exception e) {
+                        cnx.envoyer("RETRAIT NO: une erreur est survenue");
+                        e.printStackTrace(); // Debugging purposes
                     }
-                    //convertit le premier input en le montant a retirer
-                    double montantRetrait = Double.parseDouble(t[0]);
-                    numCompteClient = cnx.getNumeroCompteClient();
-                    banque = serveurBanque.getBanque();
-                    CompteClient compteRetrait = banque.getCompteClient(numCompteClient);
-                    compteRetrait.retirer(montantRetrait);
-                    cnx.envoyer("RETRAIT OK: " + montantRetrait + "RETIRE");
                     break;
                 case "FACTURE": //payer une facture
                     //verifie la connection du client
